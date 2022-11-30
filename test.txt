@@ -1,1 +1,0 @@
-{"layers":[{"learningRate":0.7,"weights":{"rows":2,"cols":2,"data":[[0.2013629363397058,-0.2039516453677983],[0.2722674300730086,-0.4509795890355752]]},"biases":{"rows":2,"cols":1,"data":[[0.8728394612213028],[-0.6577621677956982]]},"constructorName":"DenseLayer"},{"constructorName":"TanhLayer"}],"errors":[]}

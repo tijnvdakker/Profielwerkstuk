@@ -80,6 +80,8 @@ class NeuralNetwork {
         testInputs.forEach((testInput, testInputIndex) => {
             let output = this.forward(Matrix.fromArray(testInput));
 
+            console.log(output.data[0]);
+
             let maxPredicted = 0;
             let maxPredictedIndex = 0;
 
@@ -118,10 +120,9 @@ class NeuralNetwork {
         });
     }
 
-    serialize() {
-        return JSON.stringify(this);
+    predict(input) {
+        return this.forward(Matrix.fromArray(input));
     }
-    
 }
 
 module.exports = NeuralNetwork;
