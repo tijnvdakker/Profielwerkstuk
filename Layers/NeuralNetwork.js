@@ -80,7 +80,8 @@ class NeuralNetwork {
         testInputs.forEach((testInput, testInputIndex) => {
             let output = this.forward(Matrix.fromArray(testInput));
 
-            console.log(output.data[0]);
+            console.log(output);
+            console.log(testAnswers[testInputIndex]);
 
             let maxPredicted = 0;
             let maxPredictedIndex = 0;
@@ -96,6 +97,7 @@ class NeuralNetwork {
 
             if (maxAnswerIndex === maxPredictedIndex) {
                 testsCorrect += 1;
+                console.log("CORRECT");
             }
         });
 
