@@ -4,6 +4,10 @@ class Matrix {
       this.cols = cols;
       this.data = Array(this.rows).fill().map(() => Array(this.cols).fill(0));
     }
+
+    setData(data) {
+      this.data = data;
+    }
   
     copy() {
       let m = new Matrix(this.rows, this.cols);

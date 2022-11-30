@@ -1,4 +1,7 @@
 let AbstractLayer = require('./AbstractLayer');
+let DenseLayer = require('./DenseLayer');
+let TanhLayer = require('./TanhLayer');
+let SigmoidLayer = require('./SigmoidLayer');
 let meanSquaredError = require('./helpers').meanSquaredError;
 let meanSquaredErrorDerivative = require('./helpers').meanSquaredErrorDerivative;
 let Matrix = require('./matrix');
@@ -13,29 +16,39 @@ class NeuralNetwork {
     static fromJsonFile(fileName) {
         let decodedNeuralNetwork = JSON.parse(fs.readFileSync(fileName, 'utf8'));
 
-        console.log(decodedNeuralNetwork);
-
         let newNeuralNetwork = new NeuralNetwork();
 
         newNeuralNetwork.setErrors(decodedNeuralNetwork.errors);
-        
-        decodedNeuralNetwork.layers.forEach(layer => {
-            console.log(JSON.parse(JSON.stringify(layer)));
-            let instantiatedLayer = Object.assign(new this[layer.constructorName](), layer.data);
-            console.log(instantiatedLayer);
-        });
 
-        return new NeuralNetwork(decodedNeuralNetwork.layers, decodedNeuralNetwork.errors);
+        decodedNeuralNetwork.layers.forEach(layer => {
+             let instantiatedLayer = eval("new " + layer.constructorName + "()");
+
+             if (layer.constructorName == 'DenseLayer') {
+                instantiatedLayer.setLearningRate(layer.learningRate);
+
+                let newWeights = new Matrix(layer.weights.rows, layer.weights.cols);
+                newWeights.setData(layer.weights.data);
+                instantiatedLayer.setWeights(newWeights);
+
+                let newBiases = new Matrix(layer.biases.rows, layer.biases.cols);
+                newBiases.setData(layer.biases.data);
+                instantiatedLayer.setBiases(newBiases);
+             }
+             
+             newNeuralNetwork.addLayer(instantiatedLayer);
+        });
+        
+        return newNeuralNetwork;
     }
 
     toJsonFile(fileName) {
-        let test = {errors: this.errors, layers: []};
-        this.layers.forEach(layer => {
+        this.layers.forEach((layer, index) => {
             let constructorName = layer.constructor.name;
-            test.layers.push({constructorName, layer});
+            layer.constructorName = constructorName;
+            this.layers[index] = layer;
         })
 
-        fs.writeFileSync(fileName, JSON.stringify(test));
+        fs.writeFileSync(fileName, JSON.stringify(this));
     }
 
     setErrors(errors) {

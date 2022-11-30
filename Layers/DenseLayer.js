@@ -12,6 +12,18 @@ class DenseLayer extends AbstractLayer {
         this.biases = new Matrix(output_nodes, 1).randomize();
     }
 
+    setWeights(weights) {
+        this.weights = weights;
+    }
+
+    setBiases(biases) {
+        this.biases = biases;
+    }
+
+    setLearningRate(learningRate) {
+        this.learningRate = learningRate;
+    }
+
     forward(inputs) {
         this.inputs = inputs;
         return Matrix.multiply(this.weights, this.inputs).add(this.biases);

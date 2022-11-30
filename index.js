@@ -37,18 +37,9 @@ console.log(performance);
 
 nn = new NeuralNetwork();
 nn.addLayer(new DenseLayer(2, 2));
+nn.addLayer(new TanhLayer());
 
 nn.toJsonFile('test.txt');
 
 console.log(NeuralNetwork.fromJsonFile('test.txt'));
 
-var fs = require('fs');
-
-
-
-
-
-// console.log(nn.forward(Matrix.fromArray(inputs[0])));
-// console.log(nn.forward(Matrix.fromArray(inputs[1])));
-// console.log(nn.forward(Matrix.fromArray(inputs[2])));
-// console.log(nn.forward(Matrix.fromArray(inputs[3])));
