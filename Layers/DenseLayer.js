@@ -5,7 +5,7 @@ class DenseLayer extends AbstractLayer {
     constructor(input_nodes, output_nodes) {
         super();
 
-        this.learningRate = 1;
+        this.learningRate = 0.15;
 
         this.weights = new Matrix(output_nodes, input_nodes).randomize();
 

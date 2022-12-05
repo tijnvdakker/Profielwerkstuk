@@ -2,36 +2,33 @@
 <html>
     <head>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js" integrity="sha512-aVKKRRi/Q/YV+4mjoKBsE4x3H+BkegoM/em46NNlCqNTmUYADjBbeNefNxYV7giUp0VxICtqdrbqU7iVaeZNXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script
+src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js">
+</script>
     </head>
-    <body>
-        <form method="post" action="/train_and_test">
-            <input type="number" name="trainingAmount">
-            <input type="number" name="testAmount">
-            <input type="submit" value="Train en test">
-        </form>
-
-        <button id="submit-drawing">Submit</button>
-
+    <body style="padding: 0; margin: 0;">
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <canvas width="560" height="560" style="background: black; width: 50%;" id="main-canvas"></canvas>
+            <div>
+                <h1 id="output"></h1>
+            </div>
+        </div>
         <script>
-            var canvas = document.createElement('canvas');
             var hiddenCanvas = document.createElement('canvas');
-            canvas.width = "560";
-            canvas.height = "560";
             hiddenCanvas.width = "28";
             hiddenCanvas.height = "28";
             hiddenCanvas.style.float = 'right';
-            hiddenCanvas.style.background = 'black';
-            canvas.style.background = 'black';
-            document.body.appendChild(canvas);
+            hiddenCanvas.style.display = 'none';
             document.body.appendChild(hiddenCanvas);
 
-            document.body.style.margin = 0;
-            canvas.style.position = 'fixed';
-
+            var canvas = document.getElementById('main-canvas');
             var ctx = canvas.getContext('2d');
             var ctxHidden = hiddenCanvas.getContext('2d');
+            var p = document.getElementById('output');
 
-            var pos = { x: 0, y: 0 };
+            var pos = { x: canvas.offsetLeft, y: 0};
+
+            console.log(pos);
 
             document.addEventListener('mousemove', draw);
             document.addEventListener('mousedown', setPosition);
@@ -39,9 +36,43 @@
 
             // new position from mouse event
             function setPosition(e) {
-                pos.x = e.clientX;
+                pos.x = e.clientX - canvas.offsetLeft;
                 pos.y = e.clientY;
             }
+
+            setInterval(function() {
+                    ctxHidden.drawImage(canvas,0,0,560,560,0,0,28,28);
+
+                    let data = Array.from(ctxHidden.getImageData(0, 0, 28, 28).data);
+                    let brightnessValues = [];
+
+                    for (let i = 0; i < data.length; i += 4) {
+                        brightnessValues.push(data[i + 3] / 255);
+                    }
+
+                    $.ajax({
+                        url: '/predict',
+                        type: 'POST',
+                        data: JSON.stringify(brightnessValues),
+                        contentType: "application/json",
+                        processData: false,
+                        success: function(data){
+                            let highest = 0;
+                            let highestIndex = 0;
+
+                            data.data.forEach((item, index) => {
+                                if (parseFloat(item) > highest) {
+                                    highest = item;
+                                    highestIndex = index;
+                                }
+                            });
+
+                            console.log(highest);
+
+                            p.textContent = highestIndex;
+                        }
+                    });
+                }, 500);
 
             function draw(e) {
                 // mouse left button must be pressed
@@ -60,31 +91,29 @@
                 ctx.stroke(); // draw it!
             }
 
-            $('#submit-drawing').on('click', (e) => {
-                e.preventDefault();
-
-                ctxHidden.drawImage(canvas,0,0,560,560,0,0,28,28);
-
-                let data = Array.from(ctxHidden.getImageData(0, 0, 28, 28).data);
-                let brightnessValues = [];
-
-                for (let i = 0; i < data.length; i += 4) {
-                    brightnessValues.push(data[i + 3] / 255);
-                }
-
-                console.log(brightnessValues);
-                
-                $.ajax({
-                    url: '/predict',
-                    type: 'POST',
-                    data: JSON.stringify(brightnessValues),
-                    contentType: "application/json",
-                    processData: false,
-                    success: function(data){
-                        console.log(data);
-                    }
-                });
-            });
+            // $.ajax({
+            //     url: '/get_errors',
+            //     type: 'GET',
+            //     success: function (data) {
+            //         console.log(data);
+            //         let chartData = [];
+            //         data.errors.forEach((error, index) => {
+            //             if (index % 10000 == 0) {
+            //                 chartData.push(error);
+            //             }
+            //         });
+            //         new Chart("myChart", {
+            //             type: "line",
+            //             data: {
+            //                 datasets: [{
+            //                     backgroundColor: "rgba(0,0,0,1.0)",
+            //                     borderColor: "rgba(0,0,0,0.1)",
+            //                     data: chartData
+            //                 }]
+            //             }
+            //         }); 
+            //     }
+            // })
         </script>
     </body>
 </html>

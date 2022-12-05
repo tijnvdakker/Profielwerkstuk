@@ -66,6 +66,9 @@ class NeuralNetwork {
     train(inputs, answers, iterations) {
         for (let i = 0; i < iterations; i++) {
             for (let j = 0; j < inputs.length; j++) {
+                if (j % 1000 == 0) {
+                    console.log(this.testPerformance(this.testInputs, this.testOutputs));
+                }
                 let output = this.forward(Matrix.fromArray(inputs[j]));
     
                 this.backward(answers[j], output);
@@ -79,9 +82,6 @@ class NeuralNetwork {
 
         testInputs.forEach((testInput, testInputIndex) => {
             let output = this.forward(Matrix.fromArray(testInput));
-
-            console.log(output);
-            console.log(testAnswers[testInputIndex]);
 
             let maxPredicted = 0;
             let maxPredictedIndex = 0;
@@ -97,7 +97,6 @@ class NeuralNetwork {
 
             if (maxAnswerIndex === maxPredictedIndex) {
                 testsCorrect += 1;
-                console.log("CORRECT");
             }
         });
 
@@ -124,6 +123,11 @@ class NeuralNetwork {
 
     predict(input) {
         return this.forward(Matrix.fromArray(input));
+    }
+
+    setTests(testInputs, testOutputs) {
+        this.testInputs = testInputs;
+        this.testOutputs = testOutputs;
     }
 }
 
