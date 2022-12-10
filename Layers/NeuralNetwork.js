@@ -11,6 +11,8 @@ class NeuralNetwork {
     constructor() {
         this.layers = [];
         this.errors = [];
+        this.performances = [];
+        this.wronglyGuessedNumberCounts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     }
 
     static fromJsonFile(fileName) {
@@ -19,6 +21,8 @@ class NeuralNetwork {
         let newNeuralNetwork = new NeuralNetwork();
 
         newNeuralNetwork.setErrors(decodedNeuralNetwork.errors);
+        newNeuralNetwork.setPerformances(decodedNeuralNetwork.performances);
+        newNeuralNetwork.setWronglyGuessedNumberCounts(decodedNeuralNetwork.wronglyGuessedNumberCounts);
 
         decodedNeuralNetwork.layers.forEach(layer => {
              let instantiatedLayer = eval("new " + layer.constructorName + "()");
@@ -55,6 +59,14 @@ class NeuralNetwork {
         this.errors = errors;
     }
 
+    setPerformances(performances) {
+        this.performances = performances ?? [];
+    }
+
+    setWronglyGuessedNumberCounts(wronglyGuessedNumberCounts) {
+        this.wronglyGuessedNumberCounts = wronglyGuessedNumberCounts ?? [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    }
+
     addLayer(layer) {
         if (!layer instanceof AbstractLayer) {
             throw new Error("Layer has to be extended from the AbstractLayer base class");
@@ -67,7 +79,10 @@ class NeuralNetwork {
         for (let i = 0; i < iterations; i++) {
             for (let j = 0; j < inputs.length; j++) {
                 if (j % 1000 == 0) {
-                    console.log(this.testPerformance(this.testInputs, this.testOutputs));
+                    let performance = this.testPerformance(this.testInputs, this.testOutputs);
+                    this.performances.push(performance);
+                    this.wronglyGuessedNumberCounts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+                    console.log(performance);
                 }
                 let output = this.forward(Matrix.fromArray(inputs[j]));
     
@@ -97,6 +112,8 @@ class NeuralNetwork {
 
             if (maxAnswerIndex === maxPredictedIndex) {
                 testsCorrect += 1;
+            } else {
+                this.wronglyGuessedNumberCounts[maxAnswerIndex] += 1;
             }
         });
 

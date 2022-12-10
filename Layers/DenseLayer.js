@@ -31,9 +31,10 @@ class DenseLayer extends AbstractLayer {
 
     backward(outputGradient) {
         let weightGradient = Matrix.multiply(outputGradient, Matrix.transpose(this.inputs));
+        let inputGradient = Matrix.multiply(Matrix.transpose(this.weights), outputGradient);
         this.weights = Matrix.subtract(this.weights, weightGradient.multiply(this.learningRate));
         this.biases = Matrix.subtract(this.biases, outputGradient.multiply(this.learningRate));
-        return Matrix.multiply(Matrix.transpose(this.weights), outputGradient);
+        return inputGradient;
     }
 }
 

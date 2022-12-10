@@ -6,7 +6,7 @@ class SigmoidLayer extends ActivationLayer {
             return matrix.map(x => 1 / (1 + Math.exp(-x)));
         }
         function activationPrime(matrix) {
-            return matrix.map(x => x * (1 - x));
+            return matrix.map(x => 1 / (1 + Math.exp(-x)) * (1 - 1 / (1 + Math.exp(-x))));
         }
         
         super(activation, activationPrime);

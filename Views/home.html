@@ -8,10 +8,14 @@ src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js">
     </head>
     <body style="padding: 0; margin: 0;">
         <div style="display: flex; flex-direction: column; align-items: center;">
-            <canvas width="560" height="560" style="background: black; width: 50%;" id="main-canvas"></canvas>
+            <canvas width="560" height="560" style="background: black;" id="main-canvas"></canvas>
             <div>
-                <h1 id="output"></h1>
+                <h1 id="output" style="text-align: center;"></h1>
             </div>
+            <button id="reset-button">Wissen</button>
+            <canvas id="myChart"></canvas>
+            <canvas id="performanceChart"></canvas>
+            <canvas id="numberChart"></canvas>
         </div>
         <script>
             var hiddenCanvas = document.createElement('canvas');
@@ -29,6 +33,11 @@ src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js">
             var pos = { x: canvas.offsetLeft, y: 0};
 
             console.log(pos);
+
+            document.getElementById('reset-button').onclick = function() {
+                ctxHidden.clearRect(0, 0, 28, 28);
+                ctx.clearRect(0, 0, 560, 560);
+            }
 
             document.addEventListener('mousemove', draw);
             document.addEventListener('mousedown', setPosition);
@@ -60,16 +69,18 @@ src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js">
                             let highest = 0;
                             let highestIndex = 0;
 
+                            console.log(data.data);
+
                             data.data.forEach((item, index) => {
-                                if (parseFloat(item) > highest) {
-                                    highest = item;
+                                if (parseFloat(item[0]) > highest) {
+                                    highest = item[0];
                                     highestIndex = index;
                                 }
                             });
 
                             console.log(highest);
 
-                            p.textContent = highestIndex;
+                            p.innerHTML = highestIndex + "<br> (" + Math.round(highest * 100) + "% zeker)";
                         }
                     });
                 }, 500);
@@ -91,29 +102,159 @@ src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js">
                 ctx.stroke(); // draw it!
             }
 
-            // $.ajax({
-            //     url: '/get_errors',
-            //     type: 'GET',
-            //     success: function (data) {
-            //         console.log(data);
-            //         let chartData = [];
-            //         data.errors.forEach((error, index) => {
-            //             if (index % 10000 == 0) {
-            //                 chartData.push(error);
-            //             }
-            //         });
-            //         new Chart("myChart", {
-            //             type: "line",
-            //             data: {
-            //                 datasets: [{
-            //                     backgroundColor: "rgba(0,0,0,1.0)",
-            //                     borderColor: "rgba(0,0,0,0.1)",
-            //                     data: chartData
-            //                 }]
-            //             }
-            //         }); 
-            //     }
-            // })
+            $.ajax({
+                url: '/get_errors',
+                type: 'GET',
+                success: function (data) {
+                    console.log(data);
+                    let chartData = [];
+                    let total = 0;
+                    chartData.push(data.errors[0]);
+                    data.errors.forEach((error, index) => {
+                        total += error;
+                        if (index != 0 && index % 1000 == 0) {
+                            chartData.push(total / 1000);
+                            total = 0;
+                        }
+                    });
+                    console.log(chartData);
+                    new Chart("myChart", {
+                        type: "line",
+                        data: {
+                            labels: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000, 13000, 14000, 15000, 16000, 17000, 18000, 19000],
+                            datasets: [{
+                                fill: false,
+                                label: "Error",
+                                borderColor: "rgba(0,0,0,1)",
+                                data: chartData,
+                                title: 'test'
+                            }]
+                        },
+                        options: {
+                            title: {
+                                display: true,
+                                text: 'Neural network error after # of training samples'
+                            },
+                            scales: {
+                                yAxes: [{
+                                    display: true,
+                                    ticks: {
+                                        beginAtZero: true
+                                    },
+                                    scaleLabel: {
+                                        display: true,
+                                        labelString: 'Error'
+                                    }
+                                }],
+                                xAxes: [{
+                                    display: true,
+                                    ticks: {
+                                        beginAtZero: true
+                                    },
+                                    scaleLabel: {
+                                        display: true,
+                                        labelString: 'Training samples'
+                                    }
+                                }]
+                            }
+                        }
+                    }); 
+                }
+            })
+            $.ajax({
+                url: '/get_performances',
+                type: 'GET',
+                success: function (data) {
+                    new Chart("performanceChart", {
+                        type: "line",
+                        data: {
+                            labels: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000, 13000, 14000, 15000, 16000, 17000, 18000, 19000, 20000, 21000, 22000, 23000, 24000, 25000, 26000, 27000, 28000, 29000, 30000],
+                            datasets: [{
+                                fill: false,
+                                label: "Performance",
+                                borderColor: "rgba(0,0,0,1)",
+                                data: data.performances,
+                                title: 'test'
+                            }]
+                        },
+                        options: {
+                            title: {
+                                display: true,
+                                text: 'Neural network performance after # of training samples'
+                            },
+                            scales: {
+                                yAxes: [{
+                                    display: true,
+                                    ticks: {
+                                        beginAtZero: true
+                                    },
+                                    scaleLabel: {
+                                        display: true,
+                                        labelString: 'Performance'
+                                    }
+                                }],
+                                xAxes: [{
+                                    display: true,
+                                    ticks: {
+                                        beginAtZero: true
+                                    },
+                                    scaleLabel: {
+                                        display: true,
+                                        labelString: 'Training samples'
+                                    }
+                                }]
+                            }
+                        }
+                    }); 
+                }
+            })
+            $.ajax({
+                url: '/get_numbers',
+                type: 'GET',
+                success: function (data) {
+                    new Chart("numberChart", {
+                        type: "bar",
+                        data: {
+                            labels: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+                            datasets: [{
+                                fill: false,
+                                label: "Performance",
+                                borderColor: "rgba(0,0,0,1)",
+                                data: data.numbers,
+                                title: 'test'
+                            }]
+                        },
+                        options: {
+                            title: {
+                                display: true,
+                                text: 'Number of wrong guesses for each digit'
+                            },
+                            scales: {
+                                yAxes: [{
+                                    display: true,
+                                    ticks: {
+                                        beginAtZero: true
+                                    },
+                                    scaleLabel: {
+                                        display: true,
+                                        labelString: 'Number of wrong guesses'
+                                    }
+                                }],
+                                xAxes: [{
+                                    display: true,
+                                    ticks: {
+                                        beginAtZero: true
+                                    },
+                                    scaleLabel: {
+                                        display: true,
+                                        labelString: 'Digits'
+                                    }
+                                }]
+                            }
+                        }
+                    }); 
+                }
+            })
         </script>
     </body>
 </html>

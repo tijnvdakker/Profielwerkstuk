@@ -6,7 +6,7 @@ class TanhLayer extends ActivationLayer {
             return matrix.map(x => Math.tanh(x));
         }
         function activationPrime(matrix) {
-            return matrix.map(x => 1 - x ** 2);
+            return matrix.map(x => 1 - Math.tanh(x) ** 2);
         }
         
         super(activation, activationPrime);

@@ -63,10 +63,26 @@ app.get('/get_errors', (req, res) => {
    res.json({errors})
 });
 
+app.get('/get_performances', (req, res) => {
+  let nn = NeuralNetwork.fromJsonFile('Models/moreComplicatedNetwork.txt');
+
+  let performances = nn.performances;
+
+  res.json({performances})
+});
+
+app.get('/get_numbers', (req, res) => {
+  let nn = NeuralNetwork.fromJsonFile('Models/moreComplicatedNetwork.txt');
+
+  let numbers = nn.wronglyGuessedNumberCounts;
+
+  res.json({numbers})
+});
+
 app.post('/predict', (req, res) => {
    let input = req.body;
 
-   let nn = NeuralNetwork.fromJsonFile('Models/bestNetwork.txt');
+   let nn = NeuralNetwork.fromJsonFile('Models/saveTest.txt');
 
    let output = nn.predict(input);
 
@@ -133,18 +149,19 @@ let mnist;
 loadMNIST(function(data) {
   mnist = data;
 
+
   // let nn = new NeuralNetwork();
-  // nn.addLayer(new DenseLayer(784, 64));
-  // nn.addLayer(new SigmoidLayer());
-  // nn.addLayer(new DenseLayer(64, 10));
+  // nn.addLayer(new DenseLayer(784, 100));
+  // nn.addLayer(new TanhLayer());
+  // nn.addLayer(new DenseLayer(100, 10));
   // nn.addLayer(new SigmoidLayer());
 
   // let nn = NeuralNetwork.fromJsonFile('Models/moreComplicatedNetwork.txt');
-  // nn.layers[0].setLearningRate(1);
-  // nn.layers[2].setLearningRate(1);
+  // nn.layers[0].setLearningRate(0.05);
+  // nn.layers[2].setLearningRate(0.05);
 
-  // let inputs = mnist.train_images.slice(0, 60000).map(i => Array.from(i).map(n => n / 255));
-  // let targets = mnist.train_labels.slice(0, 60000);
+  // let inputs = mnist.train_images.slice(20000, 50000).map(i => Array.from(i).map(n => n / 255));
+  // let targets = mnist.train_labels.slice(20000, 50000);
   // let outputs = [];
 
   // targets.forEach(target => {
@@ -153,8 +170,8 @@ loadMNIST(function(data) {
   //   outputs.push(dataPoints);
   // });
 
-  // let testInputs = mnist.test_images.slice(1000, 4000).map(i => Array.from(i).map(n => n / 255));
-  // let testTargets = mnist.test_labels.slice(1000, 4000);
+  // let testInputs = mnist.test_images.map(i => Array.from(i).map(n => n / 255));
+  // let testTargets = mnist.test_labels;
   // let testOutputs = [];
 
   // testTargets.forEach(testTarget => {
